@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b3d91">
+<title>Escáner QR - Campeonato 2026</title>
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+<style>
+:root{--azul:#0b3d91;--azul-claro:#e8f0fe;--texto:#1f2937;--gris:#6b7280;--verde:#137333;--rojo:#b3261e;--fondo:#f3f6fa}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Arial,Helvetica,sans-serif;background:var(--fondo);color:var(--texto)}
+.header{background:var(--azul);color:#fff;padding:20px 16px 18px;text-align:center}.header-title{font-size:20px;font-weight:800}.header-subtitle{margin-top:5px;font-size:14px;opacity:.92}
+.container{width:min(650px,calc(100% - 24px));margin:18px auto 30px}.card{background:#fff;border-radius:16px;padding:20px;box-shadow:0 3px 16px rgba(0,0,0,.08)}
+.instruction{text-align:center;margin-bottom:16px}.instruction strong{display:block;font-size:18px;margin-bottom:6px}.instruction span{color:var(--gris);font-size:14px}
+#reader{width:100%;overflow:hidden;border-radius:14px}#reader video{border-radius:12px!important}.status{margin-top:14px;padding:12px 14px;border-radius:10px;background:var(--azul-claro);color:var(--azul);text-align:center;font-size:14px;font-weight:600}.status.success{background:#e6f4ea;color:var(--verde)}.status.error{background:#fce8e6;color:var(--rojo)}
+.result{display:none;margin-top:16px;padding:16px;border:1px solid #cfe3d4;border-radius:12px;background:#f6fff8;text-align:center}.result-label{font-size:12px;color:var(--gris);text-transform:uppercase;letter-spacing:.6px}.result-code{margin-top:6px;font-size:18px;font-weight:800;word-break:break-all;color:var(--verde)}
+.buttons{display:flex;gap:10px;margin-top:16px}button{width:100%;min-height:46px;border:0;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer}.btn-secondary{background:#eef1f5;color:#273142}.help{margin-top:16px;text-align:center;color:var(--gris);font-size:12px;line-height:1.45}@media(max-width:480px){.card{padding:14px}.header-title{font-size:18px}.instruction strong{font-size:17px}}
+</style>
+</head>
+<body>
+<header class="header"><div class="header-title">CAMPEONATO DE EXALUMNOS</div><div class="header-subtitle">I.E.P. LA RECOLETA - 2026</div></header>
+<main class="container"><section class="card">
+<div class="instruction"><strong>ESCANEAR CÓDIGO QR</strong><span>Apunte la cámara al código QR del titular.</span></div>
+<div id="reader"></div><div id="status" class="status">Preparando cámara...</div>
+<div id="result" class="result"><div class="result-label">Código detectado</div><div id="resultCode" class="result-code"></div></div>
+<div class="buttons"><button id="btnCancelar" class="btn-secondary" type="button">CANCELAR</button></div>
+<div class="help">El código QR se procesa directamente en este dispositivo. Después de detectarlo, se enviará el ID del registro a la pantalla de control.</div>
+</section></main>
+<script>
+let scanner=null,escaneoRealizado=false;const statusEl=document.getElementById('status'),resultEl=document.getElementById('result'),resultCodeEl=document.getElementById('resultCode'),btnCancelar=document.getElementById('btnCancelar');
+function estado(mensaje,tipo=''){statusEl.textContent=mensaje;statusEl.className='status'+(tipo?' '+tipo:'')}
+function cerrarCamara(){if(!scanner)return Promise.resolve();return scanner.stop().catch(()=>{}).then(()=>{try{scanner.clear()}catch(e){}})}
+function cancelar(){cerrarCamara().finally(()=>{if(window.opener&&!window.opener.closed){try{window.opener.postMessage({tipo:'QR_CANCELADO'},'https://script.google.com')}catch(e){}}window.close();setTimeout(()=>{estado('Puede regresar a la pantalla anterior.');btnCancelar.textContent='VOLVER';btnCancelar.onclick=()=>history.back()},300)})}
+function enviarResultado(codigo){if(escaneoRealizado)return;escaneoRealizado=true;resultCodeEl.textContent=codigo;resultEl.style.display='block';estado('QR leído correctamente. Regresando al control...','success');cerrarCamara().finally(()=>{if(window.opener&&!window.opener.closed){try{window.opener.postMessage({tipo:'QR_LEIDO',codigo:codigo},'https://script.google.com')}catch(e){}setTimeout(()=>{try{window.close()}catch(e){}},500)}else{estado('QR leído. No se encontró una pantalla de control abierta.','error');btnCancelar.textContent='VOLVER';btnCancelar.onclick=()=>history.back()}})}
+function iniciarEscaner(){if(!window.Html5Qrcode){estado('No se pudo cargar el lector QR. Revise su conexión a Internet.','error');return}scanner=new Html5Qrcode('reader');const config={fps:10,qrbox:function(w,h){const size=Math.floor(Math.min(w,h)*.70);return{width:Math.min(size,300),height:Math.min(size,300)}},aspectRatio:1.0,formatsToSupport:[Html5QrcodeSupportedFormats.QR_CODE]};estado('Solicitando acceso a la cámara...');scanner.start({facingMode:'environment'},config,(decodedText)=>{enviarResultado(decodedText.trim())},()=>{}).then(()=>{estado('Cámara activa. Apunte al código QR.');}).catch((error)=>{console.error(error);estado('No se pudo acceder a la cámara. Verifique el permiso del navegador.','error')})}
+btnCancelar.addEventListener('click',cancelar);window.addEventListener('load',iniciarEscaner);window.addEventListener('beforeunload',()=>{if(scanner){try{scanner.stop()}catch(e){}}});
+</script>
+</body></html>
