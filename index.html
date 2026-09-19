@@ -1,38 +1,332 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0b3d91">
-<title>Escáner QR - Campeonato 2026</title>
-<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-<style>
-:root{--azul:#0b3d91;--azul-claro:#e8f0fe;--texto:#1f2937;--gris:#6b7280;--verde:#137333;--rojo:#b3261e;--fondo:#f3f6fa}
-*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Arial,Helvetica,sans-serif;background:var(--fondo);color:var(--texto)}
-.header{background:var(--azul);color:#fff;padding:20px 16px 18px;text-align:center}.header-title{font-size:20px;font-weight:800}.header-subtitle{margin-top:5px;font-size:14px;opacity:.92}
-.container{width:min(650px,calc(100% - 24px));margin:18px auto 30px}.card{background:#fff;border-radius:16px;padding:20px;box-shadow:0 3px 16px rgba(0,0,0,.08)}
-.instruction{text-align:center;margin-bottom:16px}.instruction strong{display:block;font-size:18px;margin-bottom:6px}.instruction span{color:var(--gris);font-size:14px}
-#reader{width:100%;overflow:hidden;border-radius:14px}#reader video{border-radius:12px!important}.status{margin-top:14px;padding:12px 14px;border-radius:10px;background:var(--azul-claro);color:var(--azul);text-align:center;font-size:14px;font-weight:600}.status.success{background:#e6f4ea;color:var(--verde)}.status.error{background:#fce8e6;color:var(--rojo)}
-.result{display:none;margin-top:16px;padding:16px;border:1px solid #cfe3d4;border-radius:12px;background:#f6fff8;text-align:center}.result-label{font-size:12px;color:var(--gris);text-transform:uppercase;letter-spacing:.6px}.result-code{margin-top:6px;font-size:18px;font-weight:800;word-break:break-all;color:var(--verde)}
-.buttons{display:flex;gap:10px;margin-top:16px}button{width:100%;min-height:46px;border:0;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer}.btn-secondary{background:#eef1f5;color:#273142}.help{margin-top:16px;text-align:center;color:var(--gris);font-size:12px;line-height:1.45}@media(max-width:480px){.card{padding:14px}.header-title{font-size:18px}.instruction strong{font-size:17px}}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Lector QR - Campeonato 2026</title>
+
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 20px;
+      background: #f4f6f8;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #222;
+      text-align: center;
+    }
+
+    .contenedor {
+      width: 100%;
+      max-width: 500px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.10);
+    }
+
+    h1 {
+      margin: 5px 0 6px;
+      font-size: 21px;
+      color: #0b3d91;
+    }
+
+    .subtitulo {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 18px;
+    }
+
+    #reader {
+      width: 100%;
+      max-width: 420px;
+      margin: 0 auto;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .mensaje {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: bold;
+      display: none;
+    }
+
+    .mensaje.ok {
+      display: block;
+      border: 2px solid #198754;
+      background: #f1fff6;
+      color: #146c43;
+    }
+
+    .mensaje.error {
+      display: block;
+      border: 2px solid #dc3545;
+      background: #fff5f5;
+      color: #b02a37;
+    }
+
+    .boton {
+      width: 100%;
+      border: none;
+      border-radius: 9px;
+      padding: 13px 15px;
+      margin-top: 15px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .boton.volver {
+      background: #0b3d91;
+      color: white;
+    }
+
+    .codigo-detectado {
+      margin-top: 16px;
+      padding: 15px;
+      border: 2px solid #198754;
+      border-radius: 10px;
+      background: #f1fff6;
+      color: #146c43;
+      font-weight: bold;
+      display: none;
+    }
+
+    .pie {
+      margin-top: 18px;
+      font-size: 12px;
+      color: #777;
+    }
+  </style>
 </head>
+
 <body>
-<header class="header"><div class="header-title">CAMPEONATO DE EXALUMNOS</div><div class="header-subtitle">I.E.P. LA RECOLETA - 2026</div></header>
-<main class="container"><section class="card">
-<div class="instruction"><strong>ESCANEAR CÓDIGO QR</strong><span>Apunte la cámara al código QR del titular.</span></div>
-<div id="reader"></div><div id="status" class="status">Preparando cámara...</div>
-<div id="result" class="result"><div class="result-label">Código detectado</div><div id="resultCode" class="result-code"></div></div>
-<div class="buttons"><button id="btnCancelar" class="btn-secondary" type="button">CANCELAR</button></div>
-<div class="help">El código QR se procesa directamente en este dispositivo. Después de detectarlo, se enviará el ID del registro a la pantalla de control.</div>
-</section></main>
+
+  <div class="contenedor">
+
+    <h1>LECTOR QR</h1>
+
+    <div class="subtitulo">
+      Campeonato de Exalumnos<br>
+      I.E.P. La Recoleta - 2026
+    </div>
+
+    <div id="reader"></div>
+
+    <div id="codigoDetectado" class="codigo-detectado">
+      CÓDIGO DETECTADO
+    </div>
+
+    <div id="mensaje" class="mensaje"></div>
+
+    <button
+      id="botonVolver"
+      class="boton volver"
+      style="display:none;"
+      onclick="volver()">
+      VOLVER
+    </button>
+
+    <div class="pie">
+      Comité Organizador - Promoción 2001
+    </div>
+
+  </div>
+
+
 <script>
-let scanner=null,escaneoRealizado=false;const statusEl=document.getElementById('status'),resultEl=document.getElementById('result'),resultCodeEl=document.getElementById('resultCode'),btnCancelar=document.getElementById('btnCancelar');
-function estado(mensaje,tipo=''){statusEl.textContent=mensaje;statusEl.className='status'+(tipo?' '+tipo:'')}
-function cerrarCamara(){if(!scanner)return Promise.resolve();return scanner.stop().catch(()=>{}).then(()=>{try{scanner.clear()}catch(e){}})}
-function cancelar(){cerrarCamara().finally(()=>{if(window.opener&&!window.opener.closed){try{window.opener.postMessage({tipo:'QR_CANCELADO'},'https://script.google.com')}catch(e){}}window.close();setTimeout(()=>{estado('Puede regresar a la pantalla anterior.');btnCancelar.textContent='VOLVER';btnCancelar.onclick=()=>history.back()},300)})}
-function enviarResultado(codigo){if(escaneoRealizado)return;escaneoRealizado=true;resultCodeEl.textContent=codigo;resultEl.style.display='block';estado('QR leído correctamente. Regresando al control...','success');cerrarCamara().finally(()=>{if(window.opener&&!window.opener.closed){try{window.opener.postMessage({tipo:'QR_LEIDO',codigo:codigo},'https://script.google.com')}catch(e){}setTimeout(()=>{try{window.close()}catch(e){}},500)}else{estado('QR leído. No se encontró una pantalla de control abierta.','error');btnCancelar.textContent='VOLVER';btnCancelar.onclick=()=>history.back()}})}
-function iniciarEscaner(){if(!window.Html5Qrcode){estado('No se pudo cargar el lector QR. Revise su conexión a Internet.','error');return}scanner=new Html5Qrcode('reader');const config={fps:10,qrbox:function(w,h){const size=Math.floor(Math.min(w,h)*.70);return{width:Math.min(size,300),height:Math.min(size,300)}},aspectRatio:1.0,formatsToSupport:[Html5QrcodeSupportedFormats.QR_CODE]};estado('Solicitando acceso a la cámara...');scanner.start({facingMode:'environment'},config,(decodedText)=>{enviarResultado(decodedText.trim())},()=>{}).then(()=>{estado('Cámara activa. Apunte al código QR.');}).catch((error)=>{console.error(error);estado('No se pudo acceder a la cámara. Verifique el permiso del navegador.','error')})}
-btnCancelar.addEventListener('click',cancelar);window.addEventListener('load',iniciarEscaner);window.addEventListener('beforeunload',()=>{if(scanner){try{scanner.stop()}catch(e){}}});
+
+  let lectorQR = null;
+  let codigoLeido = false;
+
+  // ---------------------------------------------------------
+  // ORIGEN DE LA APLICACIÓN DE CONTROL
+  // ---------------------------------------------------------
+  const ORIGEN_CONTROL = "https://script.google.com";
+
+
+  // ---------------------------------------------------------
+  // MOSTRAR MENSAJE
+  // ---------------------------------------------------------
+  function mostrarMensaje(texto, tipo) {
+
+    const mensaje = document.getElementById("mensaje");
+
+    mensaje.textContent = texto;
+
+    mensaje.className = "mensaje " + tipo;
+  }
+
+
+  // ---------------------------------------------------------
+  // OCULTAR ELEMENTOS
+  // ---------------------------------------------------------
+  function ocultarElementosScanner() {
+
+    const reader = document.getElementById("reader");
+
+    if (reader) {
+      reader.style.display = "none";
+    }
+  }
+
+
+  // ---------------------------------------------------------
+  // ENVÍO DEL RESULTADO A INGRESO.HTML
+  // ---------------------------------------------------------
+  function enviarResultado(codigo) {
+
+    if (codigoLeido) return;
+
+    codigoLeido = true;
+
+    // Ocultamos la cámara inmediatamente
+    ocultarElementosScanner();
+
+    // Mostramos solamente confirmación.
+    // NO mostramos el código QR leído.
+    document.getElementById("codigoDetectado").style.display = "block";
+
+    mostrarMensaje(
+      "QR leído. Regresando al control de ingreso...",
+      "ok"
+    );
+
+    // Enviar el código real internamente
+    // a la ventana que abrió este lector.
+    if (window.opener && !window.opener.closed) {
+
+      window.opener.postMessage(
+        {
+          tipo: "QR_LEIDO",
+          codigo: codigo
+        },
+        ORIGEN_CONTROL
+      );
+
+      // Cerrar automáticamente el lector
+      setTimeout(function() {
+        window.close();
+      }, 700);
+
+    } else {
+
+      mostrarMensaje(
+        "No se encontró una pantalla de control abierta.",
+        "error"
+      );
+
+      document.getElementById("botonVolver").style.display = "block";
+    }
+  }
+
+
+  // ---------------------------------------------------------
+  // QR DETECTADO
+  // ---------------------------------------------------------
+  function qrDetectado(texto, resultado) {
+
+    if (codigoLeido) return;
+
+    const codigo = String(texto || "").trim();
+
+    if (!codigo) return;
+
+    enviarResultado(codigo);
+  }
+
+
+  // ---------------------------------------------------------
+  // ERROR DE ESCANEO
+  // ---------------------------------------------------------
+  function errorEscaneo(errorMessage) {
+
+    // No mostramos errores normales de búsqueda
+    // para evitar llenar la pantalla mientras escanea.
+  }
+
+
+  // ---------------------------------------------------------
+  // INICIAR CÁMARA
+  // ---------------------------------------------------------
+  function iniciarCamara() {
+
+    lectorQR = new Html5Qrcode("reader");
+
+    const configuracion = {
+      fps: 10,
+      qrbox: {
+        width: 250,
+        height: 250
+      },
+      formatsToSupport: [
+        Html5QrcodeSupportedFormats.QR_CODE
+      ]
+    };
+
+    lectorQR.start(
+      {
+        facingMode: "environment"
+      },
+      configuracion,
+      qrDetectado,
+      errorEscaneo
+    )
+    .catch(function(error) {
+
+      mostrarMensaje(
+        "No se pudo iniciar la cámara. Verifique los permisos del navegador.",
+        "error"
+      );
+
+      document.getElementById("botonVolver").style.display = "block";
+    });
+  }
+
+
+  // ---------------------------------------------------------
+  // VOLVER
+  // ---------------------------------------------------------
+  function volver() {
+
+    if (window.opener && !window.opener.closed) {
+
+      window.opener.postMessage(
+        {
+          tipo: "QR_CANCELADO"
+        },
+        ORIGEN_CONTROL
+      );
+
+      window.close();
+
+    } else {
+
+      window.history.back();
+    }
+  }
+
+
+  // ---------------------------------------------------------
+  // INICIO
+  // ---------------------------------------------------------
+  window.addEventListener("load", function() {
+
+    iniciarCamara();
+
+  });
+
 </script>
-</body></html>
+
+</body>
+</html>
