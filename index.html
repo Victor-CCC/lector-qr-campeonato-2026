@@ -1,14 +1,24 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
 
   <title>Lector QR - Campeonato 2026</title>
 
-  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <!-- Lector QR -->
+  <script
+    src="https://unpkg.com/html5-qrcode"
+    type="text/javascript">
+  </script>
 
   <style>
+
     * {
       box-sizing: border-box;
     }
@@ -16,129 +26,248 @@
     body {
       margin: 0;
       padding: 20px;
+
       background: #f4f6f8;
-      font-family: Arial, Helvetica, sans-serif;
+
+      font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
       color: #222;
+
       text-align: center;
     }
 
     .contenedor {
+
       width: 100%;
       max-width: 500px;
+
       margin: 0 auto;
+
       background: white;
+
       border-radius: 14px;
+
       padding: 20px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.10);
+
+      box-shadow:
+        0 2px 10px
+        rgba(0, 0, 0, 0.10);
     }
 
     h1 {
-      margin: 5px 0 6px;
+
+      margin:
+        5px 0 6px;
+
       font-size: 21px;
+
       color: #0b3d91;
     }
 
     .subtitulo {
+
       font-size: 14px;
+
       color: #666;
+
       margin-bottom: 18px;
+
+      line-height: 1.4;
     }
 
     #reader {
+
       width: 100%;
+
       max-width: 420px;
+
       margin: 0 auto;
+
       border-radius: 10px;
+
       overflow: hidden;
     }
 
+    /*
+     * Mensajes
+     */
+
     .mensaje {
+
       margin-top: 16px;
+
       padding: 14px;
+
       border-radius: 10px;
+
       font-size: 15px;
+
       font-weight: bold;
+
       display: none;
     }
 
     .mensaje.ok {
+
       display: block;
+
       border: 2px solid #198754;
+
       background: #f1fff6;
+
       color: #146c43;
     }
 
     .mensaje.error {
+
       display: block;
+
       border: 2px solid #dc3545;
+
       background: #fff5f5;
+
       color: #b02a37;
     }
 
+    /*
+     * Botón
+     */
+
     .boton {
+
       width: 100%;
+
       border: none;
+
       border-radius: 9px;
+
       padding: 13px 15px;
+
       margin-top: 15px;
+
       font-size: 16px;
+
       font-weight: bold;
+
       cursor: pointer;
     }
 
     .boton.volver {
+
       background: #0b3d91;
+
       color: white;
     }
 
+    /*
+     * Código detectado
+     */
+
     .codigo-detectado {
+
       margin-top: 16px;
+
       padding: 15px;
+
       border: 2px solid #198754;
+
       border-radius: 10px;
+
       background: #f1fff6;
+
       color: #146c43;
+
       font-weight: bold;
+
       display: none;
     }
 
+    /*
+     * Pie
+     */
+
     .pie {
+
       margin-top: 18px;
+
       font-size: 12px;
+
       color: #777;
     }
+
   </style>
+
 </head>
+
 
 <body>
 
   <div class="contenedor">
 
-    <h1>LECTOR QR</h1>
+    <h1>
+      LECTOR QR
+    </h1>
 
     <div class="subtitulo">
+
       Campeonato de Exalumnos<br>
+
       I.E.P. La Recoleta - 2026
+
     </div>
+
+
+    <!--
+      Aquí se muestra la cámara
+    -->
 
     <div id="reader"></div>
 
-    <div id="codigoDetectado" class="codigo-detectado">
+
+    <!--
+      Código detectado
+    -->
+
+    <div
+      id="codigoDetectado"
+      class="codigo-detectado"
+    >
       CÓDIGO DETECTADO
     </div>
 
-    <div id="mensaje" class="mensaje"></div>
+
+    <!--
+      Mensaje
+    -->
+
+    <div
+      id="mensaje"
+      class="mensaje"
+    ></div>
+
+
+    <!--
+      Botón volver
+    -->
 
     <button
       id="botonVolver"
       class="boton volver"
       style="display:none;"
-      onclick="volver()">
+      onclick="volver()"
+    >
       VOLVER
     </button>
 
+
     <div class="pie">
-      Comité Organizador - Promoción 2001
+
+      Comité Organizador -
+      Promoción 2001
+
     </div>
 
   </div>
@@ -146,187 +275,430 @@
 
 <script>
 
+  /*
+   * ==========================================================
+   * VARIABLES PRINCIPALES
+   * ==========================================================
+   */
+
   let lectorQR = null;
+
   let codigoLeido = false;
 
-  // ---------------------------------------------------------
-  // ORIGEN DE LA APLICACIÓN DE CONTROL
-  // ---------------------------------------------------------
+
+  /*
+   * El control de ingreso está alojado en Google Apps Script.
+   *
+   * Usamos "*" porque el navegador puede entregar el mensaje
+   * desde el contexto de Apps Script / iframe.
+   *
+   * La validación real del origen se realiza en Ingreso.html.
+   */
+
   const ORIGEN_CONTROL = "*";
 
 
-  // ---------------------------------------------------------
-  // MOSTRAR MENSAJE
-  // ---------------------------------------------------------
+  /*
+   * ==========================================================
+   * MOSTRAR MENSAJE
+   * ==========================================================
+   */
+
   function mostrarMensaje(texto, tipo) {
 
-    const mensaje = document.getElementById("mensaje");
+    const mensaje =
+      document.getElementById("mensaje");
+
+    if (!mensaje) {
+      return;
+    }
 
     mensaje.textContent = texto;
 
-    mensaje.className = "mensaje " + tipo;
+    mensaje.className =
+      "mensaje " + tipo;
   }
 
 
-  // ---------------------------------------------------------
-  // OCULTAR ELEMENTOS
-  // ---------------------------------------------------------
+  /*
+   * ==========================================================
+   * OCULTAR SCANNER
+   * ==========================================================
+   */
+
   function ocultarElementosScanner() {
 
-    const reader = document.getElementById("reader");
+    const reader =
+      document.getElementById("reader");
 
     if (reader) {
+
       reader.style.display = "none";
+
     }
   }
 
 
-  // ---------------------------------------------------------
-  // ENVÍO DEL RESULTADO A INGRESO.HTML
-  // ---------------------------------------------------------
+  /*
+   * ==========================================================
+   * ENVIAR RESULTADO AL CONTROL
+   * ==========================================================
+   */
+
   function enviarResultado(codigo) {
 
-    if (codigoLeido) return;
+    /*
+     * Evitar que el mismo QR sea enviado
+     * varias veces.
+     */
+
+    if (codigoLeido) {
+
+      return;
+
+    }
+
 
     codigoLeido = true;
 
-    // Ocultamos la cámara inmediatamente
+
+    /*
+     * Ocultar la cámara.
+     */
+
     ocultarElementosScanner();
 
-    // Mostramos solamente confirmación.
-    // NO mostramos el código QR leído.
-    document.getElementById("codigoDetectado").style.display = "block";
+
+    /*
+     * Mostrar indicador de código detectado.
+     */
+
+    const codigoDetectado =
+      document.getElementById(
+        "codigoDetectado"
+      );
+
+    if (codigoDetectado) {
+
+      codigoDetectado.textContent =
+        "QR DETECTADO";
+
+      codigoDetectado.style.display =
+        "block";
+    }
+
+
+    /*
+     * Mostrar mensaje temporal.
+     */
 
     mostrarMensaje(
       "QR leído. Regresando al control de ingreso...",
       "ok"
     );
 
-    // Enviar el código real internamente
-    // a la ventana que abrió este lector.
-    if (window.opener && !window.opener.closed) {
+
+    /*
+     * ======================================================
+     * ENVIAR EL CÓDIGO A LA VENTANA QUE ABRIÓ EL LECTOR
+     * ======================================================
+     */
+
+    if (
+      window.opener &&
+      !window.opener.closed
+    ) {
 
       window.opener.postMessage(
+
         {
           tipo: "QR_LEIDO",
+
           codigo: codigo
         },
+
         ORIGEN_CONTROL
+
       );
 
-      // Cerrar automáticamente el lector
-      setTimeout(function() {
-        window.close();
-      }, 700);
 
-    } else {
+      /*
+       * Cerramos automáticamente el lector.
+       *
+       * El control de ingreso queda nuevamente visible.
+       */
 
-      mostrarMensaje(
-        "No se encontró una pantalla de control abierta.",
-        "error"
+      setTimeout(
+        function() {
+
+          window.close();
+
+        },
+        700
       );
 
-      document.getElementById("botonVolver").style.display = "block";
+
+      return;
     }
+
+
+    /*
+     * ======================================================
+     * SI NO EXISTE VENTANA PADRE
+     * ======================================================
+     */
+
+    mostrarMensaje(
+      "No se encontró una pantalla de control abierta.",
+      "error"
+    );
+
+
+    const botonVolver =
+      document.getElementById(
+        "botonVolver"
+      );
+
+    if (botonVolver) {
+
+      botonVolver.style.display =
+        "block";
+    }
+
   }
 
 
-  // ---------------------------------------------------------
-  // QR DETECTADO
-  // ---------------------------------------------------------
-  function qrDetectado(texto, resultado) {
+  /*
+   * ==========================================================
+   * QR DETECTADO
+   * ==========================================================
+   */
 
-    if (codigoLeido) return;
+  function qrDetectado(
+    texto,
+    resultado
+  ) {
 
-    const codigo = String(texto || "").trim();
+    /*
+     * Si ya se leyó un código,
+     * ignoramos nuevas lecturas.
+     */
 
-    if (!codigo) return;
+    if (codigoLeido) {
+
+      return;
+
+    }
+
+
+    /*
+     * Convertir a texto y quitar
+     * espacios innecesarios.
+     */
+
+    const codigo =
+      String(texto || "").trim();
+
+
+    /*
+     * Si no hay código, no hacemos nada.
+     */
+
+    if (!codigo) {
+
+      return;
+
+    }
+
+
+    /*
+     * Enviar código al control.
+     */
 
     enviarResultado(codigo);
+
   }
 
 
-  // ---------------------------------------------------------
-  // ERROR DE ESCANEO
-  // ---------------------------------------------------------
-  function errorEscaneo(errorMessage) {
+  /*
+   * ==========================================================
+   * ERRORES DE ESCANEO
+   * ==========================================================
+   *
+   * html5-qrcode genera muchos mensajes mientras intenta
+   * encontrar un QR. No mostramos esos mensajes para evitar
+   * llenar la pantalla.
+   */
 
-    // No mostramos errores normales de búsqueda
-    // para evitar llenar la pantalla mientras escanea.
+  function errorEscaneo(
+    errorMessage
+  ) {
+
+    // No hacer nada.
+
   }
 
 
-  // ---------------------------------------------------------
-  // INICIAR CÁMARA
-  // ---------------------------------------------------------
+  /*
+   * ==========================================================
+   * INICIAR CÁMARA
+   * ==========================================================
+   */
+
   function iniciarCamara() {
 
-    lectorQR = new Html5Qrcode("reader");
+    /*
+     * Crear lector.
+     */
+
+    lectorQR =
+      new Html5Qrcode("reader");
+
+
+    /*
+     * Configuración.
+     */
 
     const configuracion = {
+
       fps: 10,
+
       qrbox: {
+
         width: 250,
+
         height: 250
+
       },
+
       formatsToSupport: [
+
         Html5QrcodeSupportedFormats.QR_CODE
+
       ]
+
     };
 
+
+    /*
+     * Iniciar cámara trasera.
+     */
+
     lectorQR.start(
+
       {
         facingMode: "environment"
       },
+
       configuracion,
+
       qrDetectado,
+
       errorEscaneo
+
     )
-    .catch(function(error) {
 
-      mostrarMensaje(
-        "No se pudo iniciar la cámara. Verifique los permisos del navegador.",
-        "error"
-      );
+    .catch(
 
-      document.getElementById("botonVolver").style.display = "block";
-    });
+      function(error) {
+
+        console.error(
+          "Error al iniciar cámara:",
+          error
+        );
+
+
+        mostrarMensaje(
+          "No se pudo iniciar la cámara. Verifique los permisos del navegador.",
+          "error"
+        );
+
+
+        const botonVolver =
+          document.getElementById(
+            "botonVolver"
+          );
+
+        if (botonVolver) {
+
+          botonVolver.style.display =
+            "block";
+
+        }
+
+      }
+
+    );
+
   }
 
 
-  // ---------------------------------------------------------
-  // VOLVER
-  // ---------------------------------------------------------
+  /*
+   * ==========================================================
+   * VOLVER
+   * ==========================================================
+   */
+
   function volver() {
 
-    if (window.opener && !window.opener.closed) {
+    /*
+     * Si existe una ventana de control,
+     * avisamos que se canceló el escaneo.
+     */
+
+    if (
+      window.opener &&
+      !window.opener.closed
+    ) {
 
       window.opener.postMessage(
+
         {
           tipo: "QR_CANCELADO"
         },
+
         ORIGEN_CONTROL
+
       );
+
 
       window.close();
 
-    } else {
+      return;
 
-      window.history.back();
     }
+
+
+    /*
+     * Si no existe ventana padre,
+     * regresar a la página anterior.
+     */
+
+    window.history.back();
+
   }
 
 
-  // ---------------------------------------------------------
-  // INICIO
-  // ---------------------------------------------------------
-  window.addEventListener("load", function() {
+  /*
+   * ==========================================================
+   * AL CARGAR LA PÁGINA
+   * ==========================================================
+   */
 
-    iniciarCamara();
+  window.addEventListener(
 
-  });
+    "load",
+
+    function() {
+
+      iniciarCamara();
+
+    }
+
+  );
 
 </script>
 
 </body>
+
 </html>
